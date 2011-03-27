@@ -42,10 +42,21 @@ def delete_user(user_id, access_token):
         return False
 
 def print_users(users):
+    if len(users) == 0:
+        print "No users."
+        return
+    
     print 'Users: '
     i = 1
     for user in users:
-        print "  %s - %s:\n        login_url: %s\n        token: %s" % (i, user['id'], user['login_url'], user['access_token'])
+        token_str = 'No token.'
+        if 'access_token' in user:
+            token_str = user['access_token']
+
+        print "  %s - %s:\n        login_url: %s\n        token: %s" % (i,
+                                                                        user['id'],
+                                                                        user['login_url'],
+                                                                        token_str)
         i += 1
 
 def find_user(user_id, users):
@@ -83,9 +94,6 @@ if __name__ == '__main__':
     users = load_users(app_id, access_token)
     print 'done.'
 
-    print_users(users)
-
-
     while True:
         try:
             input = raw_input('Command (? for help): ')
@@ -101,10 +109,9 @@ if __name__ == '__main__':
                                            access_token,
                                            installed_options[installed],
                                            permissions)
-                    users.append(new_user)
-                    print_users(users)
-                elif cmd == 'l':
                     users = load_users(app_id, access_token)
+                    print "User added."
+                elif cmd == 'l':
                     print_users(users)
                 elif cmd == 'd':
                     try:
@@ -115,6 +122,7 @@ if __name__ == '__main__':
                             print 'User deleted.'
                         else:
                             print 'User not deleted.'
+                        users = load_users(app_id, access_token)
                     except (IndexError, ValueError), e:
                         print e
                         print 'Invalid user number.'
