@@ -41,6 +41,31 @@ def delete_user(user_id, access_token):
     else:
         return False
 
+def friend_users(user_1, user_2):
+    url = "https://%s/%s/friends/%s"
+    
+    try:
+        print "User 1 -> User 2...",
+        d1 = {'access_token': user_1['access_token']}
+        f1 = urllib2.urlopen(url % (GRAPH_URL, user_1['id'], user_2['id']),
+                             data=urllib.urlencode(d1))
+        r1 = f1.read()
+        print "done."
+    except urllib2.HTTPError, e:
+        error = simplejson.loads(e.read())
+        print error['error']['message']
+
+    try:
+        print "User 2 -> User 1...",
+        d2 = {'access_token': user_2['access_token']}
+        f2 = urllib2.urlopen(url % (GRAPH_URL, user_2['id'], user_1['id']),
+                             data=urllib.urlencode(d2))
+        r2 = f2.read()
+        print "done."
+    except urllib2.HTTPError, e:
+        error = simplejson.loads(e.read())
+        print error['error']['message']
+
 def print_users(users):
     if len(users) == 0:
         print "No users."
@@ -59,14 +84,6 @@ def print_users(users):
                                                                         token_str)
         i += 1
 
-def find_user(user_id, users):
-    u = None
-    for user in users:
-        if user['id'] == user_id:
-            u = user
-            break
-    return u
-
 def question(question, options):
     while True:
         options_str = '/'.join(options)
@@ -74,6 +91,15 @@ def question(question, options):
         if answer in options:
             return answer
 
+def question_user(question):
+    while True:
+        try:
+            user_num = int(raw_input(" %s #: " % question))-1
+            user = users[user_num]
+            return user
+        except (IndexError, ValueError), e:
+            print 'Invalid user number.'    
+        
 if __name__ == '__main__':
     usage = "usage: %prog <app_id> <app_secret>"
     parser = OptionParser(usage=usage)
@@ -100,7 +126,7 @@ if __name__ == '__main__':
             if len(input) != 0:
                 cmd = input.strip()
                 if cmd == '?':
-                    print "Command action\n  a  Add user\n  l  List users\n  d  Delete user\n  f  Friend users\n"
+                    print "Command action\n  a  Add user\n  l  List users\n  r  Reload user list\n  d  Delete user\n  f  Friend users\n"
                 elif cmd == 'a':
                     installed = question('Installed', ['Y', 'N'])
                     installed_options = {'Y': 'true', 'N': 'false'}
@@ -113,18 +139,26 @@ if __name__ == '__main__':
                     print "User added."
                 elif cmd == 'l':
                     print_users(users)
+                elif cmd == 'r':
+                    users = load_users(app_id, access_token)
+                    print "Done"
+                elif cmd == 'f':
+                    user_1 = question_user('First User')
+                    user_2 = question_user('Second User')
+
+                    if 'access_token' not in user_1 or 'access_token' not in user_2:
+                        print 'Both users need to have access tokens.'
+                    elif user_1 == user_2:
+                        print 'A user cannot befriend themselves. Tragic.'
+                    else:
+                        friend_users(user_1, user_2)
                 elif cmd == 'd':
-                    try:
-                        user_num = int(raw_input(' User #: '))-1
-                        user = users[user_num]
-                        r = delete_user(user['id'], access_token)
-                        if r:
-                            print 'User deleted.'
-                        else:
-                            print 'User not deleted.'
-                        users = load_users(app_id, access_token)
-                    except (IndexError, ValueError), e:
-                        print e
-                        print 'Invalid user number.'
+                    user = question_user('User')
+                    r = delete_user(user['id'], access_token)
+                    if r:
+                        print 'User deleted.'
+                    else:
+                        print 'User not deleted.'
+                    users = load_users(app_id, access_token)
         except EOFError, e:
             sys.exit(1)
