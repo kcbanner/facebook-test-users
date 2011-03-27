@@ -11,6 +11,10 @@
 
   Type '?' at the prompt for a list of commands.
 
+## API Usage
+
+  The user list is automatically reloaded after any command that could change it. Use the `r` command to reload it manually
+
 ## License
 
   facebook-test-users - A command line utility for managing Facebook test users
