@@ -160,5 +160,7 @@ if __name__ == '__main__':
                     else:
                         print 'User not deleted.'
                     users = load_users(app_id, access_token)
-        except EOFError, e:
+                else:
+                    print 'Unknown command.'
+        except (EOFError, KeyboardInterrupt), e:
             sys.exit(1)
