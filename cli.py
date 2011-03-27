@@ -126,7 +126,7 @@ if __name__ == '__main__':
             if len(input) != 0:
                 cmd = input.strip()
                 if cmd == '?':
-                    print "Command action\n  a  Add user\n  l  List users\n  r  Reload user list\n  d  Delete user\n  f  Friend users\n"
+                    print "Command action\n  a  Add user\n  l  List users\n  r  Reload user list\n  d  Delete user\n  f  Friend users\n  q  Quit"
                 elif cmd == 'a':
                     installed = question('Installed', ['Y', 'N'])
                     installed_options = {'Y': 'true', 'N': 'false'}
@@ -160,6 +160,8 @@ if __name__ == '__main__':
                     else:
                         print 'User not deleted.'
                     users = load_users(app_id, access_token)
+                elif cmd == 'q' or cmd == 'quit' or cmd == 'exit':
+                    sys.exit(1)
                 else:
                     print 'Unknown command.'
         except (EOFError, KeyboardInterrupt), e:
