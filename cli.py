@@ -40,7 +40,24 @@ def delete_user(user_id, access_token):
         return True
     else:
         return False
-
+        
+def modify_user(user_id, password):
+    url = "https://%s/%s"
+    
+    try:
+        d1 = {'access_token': user_id['access_token'], 'password': password}
+        f1 = urllib2.urlopen(url % (GRAPH_URL, user_id['id']),
+                             data=urllib.urlencode(d1))
+        content = f1.read()
+    
+        if content == 'true':
+            return 'New password of "%s" for %s set.' % (password,user_id['id'],)
+        else:
+            return 'Error:Password for %s not changed.' % (user_id['id'],)
+    except urllib2.HTTPError, e:
+        error = simplejson.loads(e.read())
+        print error['error']['message']
+    
 def friend_users(user_1, user_2):
     url = "https://%s/%s/friends/%s"
     
@@ -126,7 +143,7 @@ if __name__ == '__main__':
             if len(input) != 0:
                 cmd = input.strip()
                 if cmd == '?':
-                    print "Command action\n  a  Add user\n  l  List users\n  r  Reload user list\n  d  Delete user\n  f  Friend users\n  q  Quit"
+                    print "Command action\n  a  Add user\n  l  List users\n  m  Modify user\n  r  Reload user list\n  d  Delete user\n  f  Friend users\n  q  Quit"
                 elif cmd == 'a':
                     installed = question('Installed', ['Y', 'N'])
                     installed_options = {'Y': 'true', 'N': 'false'}
@@ -162,6 +179,12 @@ if __name__ == '__main__':
                     users = load_users(app_id, access_token)
                 elif cmd == 'q' or cmd == 'quit' or cmd == 'exit':
                     sys.exit(1)
+                    
+                elif cmd =='m':
+                    user_1 = question_user('User ')
+                    password = raw_input("Enter Password: ").strip()
+                    modify_result = modify_user(user_1,password)
+                    print modify_result
                 else:
                     print 'Unknown command.'
         except (EOFError, KeyboardInterrupt), e:
